@@ -158,7 +158,6 @@ class Server:
                 subject=email_list[i]["subject"],
                 date=email_list[i]["date"]
             ))
-
         return ret
 
     def _get_email_list(self, client_soc: socket.socket
@@ -270,11 +269,12 @@ class Server:
         """
         destination, is_external = self._parse_email_address(payload["destination"])
         # check if external
+        print("CONSOLE : " + destination)
         if is_external:
             message = gloutils.GloMessage(header=gloutils.Headers.ERROR, payload=gloutils.ErrorPayload(error_message="Le destinataire est externe"))
             return message
         # check if destination exist
-        if not os.path.exists(gloutils.SERVER_DATA_DIR + "/" + destination):
+        if destination == "" or not os.path.exists(gloutils.SERVER_DATA_DIR + "/" + destination):
             # write message in SERVER_LOST_DIR
             with open(gloutils.SERVER_DATA_DIR + "/" + gloutils.SERVER_LOST_DIR + "/" + destination + "_" + payload["date"].replace(":", "-"), "w") as file:
                 self._write_message(file, payload)
@@ -294,28 +294,24 @@ class Server:
         print("")
         match data_json["header"]:
             case header.AUTH_LOGIN:
-                print("LOGIN")
                 message = self._login(client_soc, data_json["payload"])
             case header.AUTH_REGISTER:
-                print("REGISTER")
                 message = self._create_account(client_soc, data_json["payload"])
             case header.AUTH_LOGOUT:
-                print("LOGOUT")
                 message = self._logout(client_soc)
             case header.INBOX_READING_REQUEST:
-                print("INBOX_READING_REQUEST")
                 message = self._get_email_list(client_soc)
             case header.INBOX_READING_CHOICE:
-                print("INBOX_READING_CHOICE")
                 message = self._get_email(client_soc, data_json["payload"])
             case header.EMAIL_SENDING:
-                print("EMAIL_SENDING")
                 message = self._send_email(data_json["payload"])
             case header.STATS_REQUEST:
-                print("STATS_REQUEST")
                 message = self._get_stats(client_soc)
         if message != None:
-            glosocket.send_mesg(client_soc, json.dumps(message))
+            try:
+                glosocket.send_mesg(client_soc, json.dumps(message))
+            except glosocket.GLOSocketError:
+                print("ERROR : Failed to send message to client")
 
 
 
