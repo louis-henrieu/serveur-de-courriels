@@ -225,15 +225,18 @@ class Client:
 
     def run(self) -> None:
         """Point d'entrée du client."""
-        should_quit = False
+        try:
+            should_quit = False
 
-        while not should_quit:
-            if not self._username:
-                # Authentication menu
-                self._authChoice()
-            else:
-                # User menu
-                self._userChoice()
+            while not should_quit:
+                if not self._username:
+                    # Authentication menu
+                    self._authChoice()
+                else:
+                    # User menu
+                    self._userChoice()
+        except  KeyboardInterrupt as ex:
+            self._quit()
 
 
 def _main() -> int:
