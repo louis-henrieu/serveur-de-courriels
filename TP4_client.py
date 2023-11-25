@@ -59,7 +59,7 @@ class GenericFunction:
                 print(data_json["payload"]["error_message"])
             return data_json
         except glosocket.GLOSocketError:
-            raise "Error : Impossible to get server response"
+            print("Error : Impossible to get server response", file=sys.stderr)
             exit(-1)
 
 class Client:
@@ -76,7 +76,7 @@ class Client:
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.connect((destination, gloutils.APP_PORT))
         except OSError:
-            raise "ERROR : Impossible to create socket"
+            print("ERROR : Impossible to create socket", file=sys.stderr)
             exit(-1)
         self._username = ""
         self._genericFunction = GenericFunction(self._socket)
